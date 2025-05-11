@@ -1,0 +1,7 @@
+# The .gitignore file specifies intentionally untracked files that Git should ignore.
+# Files and directories listed here will not be included in version control.
+# This is useful for excluding build artifacts, temporary files, and sensitive information.
+
+# Ignore IntelliJ IDEA project files
+.idea/
+*.iml
