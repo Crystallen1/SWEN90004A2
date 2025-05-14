@@ -2,14 +2,55 @@ package model;
 
 public class Patch {
 
-    int x, y;
-    int grainHere;
-    int maxGrain;
+    private int x, y;
+    private int grainHere;
+    private int maxGrain;
 
     public Patch(int x, int y, int maxGrain) {
+        this.x = x;
+        this.y = y;
+        this.maxGrain = maxGrain;
+        grainHere = 0;
     }
 
+    /**
+     * This method grows the grain on the patch by the growth rate.
+     * If the grain on the patch is more than the max grain, it is set to the max grain.
+     * @param growthRate
+     */
     public void growGrain(int growthRate) {
-
+        if (grainHere < maxGrain) {
+            grainHere += growthRate;
+            if (grainHere >= maxGrain) {
+                grainHere = maxGrain;
+            }
+        }
     }
+
+    public int getGrainHere() {
+        return grainHere;
+    }
+
+    /**
+     * This method set the grain on the patch to the given value. (Used for after harvesting)
+     * @param grainHere
+     */
+    public void setGrainHere(int grainHere) {
+        this.grainHere = grainHere;
+    }
+
+    public int getMaxGrain() {
+        return maxGrain;
+    }
+
+    /**
+     * This method set the max grain on the patch to the given value after diffusion.
+     * @param maxGrain
+     */
+    public void setMaxGrain(int maxGrain) {
+        this.maxGrain = maxGrain;
+    }
+
+
+
 }
