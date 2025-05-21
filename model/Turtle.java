@@ -1,6 +1,8 @@
 package model;
 
 import java.util.Random;
+import java.util.List;
+import java.util.ArrayList;
 
 public class Turtle {
     int x, y;
@@ -24,48 +26,45 @@ public class Turtle {
         Direction bestDir = null;
         int maxGrain = -1;
 
-        //find the best direction for the turtle to move to
+        // Find the best direction for the turtle to move to
         for (Direction dir : Direction.values()) {
+            int totalGrain = 0;
             for (int dist = 1; dist <= vision; dist++) {
                 int newX = (x + dir.getDx() * dist + world.width) % world.width;
                 int newY = (y + dir.getDy() * dist + world.height) % world.height;
-
-                int grain = world.map[newX][newY].getGrainHere();
-                if (grain > maxGrain) {
-                    maxGrain = grain;
-                    bestDir = dir;
-                }
+                totalGrain += world.map[newX][newY].getGrainHere();
+            }
+            if (totalGrain > maxGrain) {
+                maxGrain = totalGrain;
+                bestDir = dir;
             }
         }
 
-        //move the turtle
+        // Move the turtle
         if (bestDir != null) {
             move(bestDir, world);
         }
     }
 
     public void move(Direction dir, World world) {
-        int bestX = x;
-        int bestY = y;
-        int maxGrain = -1;
+        x = (x + dir.getDx() + world.width) % world.width;
+        y = (y + dir.getDy() + world.height) % world.height;
+    }
 
-        for (int dist = 1; dist <= vision; dist++) {
-            int newX = (x + dir.getDx() * dist + world.width) % world.width;
-            int newY = (y + dir.getDy() * dist + world.height) % world.height;
-
-            int grain = world.map[newX][newY].getGrainHere();
-            if (grain > maxGrain) {
-                maxGrain = grain;
-                bestX = newX;
-                bestY = newY;
+    public void harvest(World world) {
+        Patch patch = world.map[x][y];
+        List<Turtle> turtlesHere = new ArrayList<>();
+        
+        // Find all turtles on the same patch
+        for (Turtle t : world.turtles) {
+            if (t.x == x && t.y == y) {
+                turtlesHere.add(t);
             }
         }
-
-        // Move and harvest grain
-        x = bestX;
-        y = bestY;
-        Patch patch = world.map[x][y];
-        wealth += patch.getGrainHere();
+        
+        // Distribute grain equally
+        int grainPerTurtle = patch.getGrainHere() / turtlesHere.size();
+        wealth += grainPerTurtle;
         patch.setGrainHere(0);
     }
 
@@ -79,20 +78,12 @@ public class Turtle {
     }
 
     public void rebirth(World world) {
-        // Find min and max wealth among current turtles
-        int minWealth = Integer.MAX_VALUE;
-        int maxWealth = Integer.MIN_VALUE;
-
-        for (Turtle t : world.turtles) {
-            minWealth = Math.min(minWealth, t.wealth);
-            maxWealth = Math.max(maxWealth, t.wealth);
-        }
-
         this.age = 0;
-        this.metabolism = 1 + random.nextInt(4);       // Example: [1, 4]
-        this.vision = 1 + random.nextInt(5);           // Example: [1, 5]
-        this.lifeExpectancy = 60 + random.nextInt(40); // Example: [60, 99]
-        this.wealth = minWealth + random.nextInt(maxWealth - minWealth + 1);
+        this.metabolism = 1 + random.nextInt(world.maxMetabolism);
+        this.vision = 1 + random.nextInt(world.maxVision);
+        this.lifeExpectancy = world.minLifeExpectancy + 
+                             random.nextInt(world.maxLifeExpectancy - world.minLifeExpectancy + 1);
+        this.wealth = this.metabolism + random.nextInt(50);
         this.x = random.nextInt(world.width);
         this.y = random.nextInt(world.height);
     }
