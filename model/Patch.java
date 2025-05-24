@@ -19,11 +19,11 @@ public class Patch {
      * @param growthRate
      */
     public void growGrain(int growthRate) {
+        if (maxGrain == 0) {
+            return;
+        }
         if (grainHere < maxGrain) {
-            grainHere += growthRate;
-            if (grainHere >= maxGrain) {
-                grainHere = maxGrain;
-            }
+            grainHere = Math.min(grainHere + growthRate, maxGrain);
         }
     }
 

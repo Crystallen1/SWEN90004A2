@@ -11,6 +11,7 @@ public class Turtle {
     int metabolism;
     int vision;
     int lifeExpectancy;
+    private Direction currentDirection;
 
     private static final Random random = new Random();
 
@@ -19,53 +20,94 @@ public class Turtle {
         this.vision = vision;
         this.lifeExpectancy = lifeExpectancy;
         this.age = 0;
-        this.wealth = 0;
+        this.wealth = 0; // Initial wealth is set in World
     }
 
+    /**
+     * Decide movement direction following NetLogo's turn-towards-grain logic
+     */
     public void decideDirection(World world) {
-        Direction bestDir = null;
-        int maxGrain = -1;
-
-        // Find the best direction for the turtle to move to
+        Direction bestDirection = Direction.NORTH; // Default direction
+        int bestAmount = getGrainAhead(world, Direction.NORTH);
+        
+        // Check all 4 directions
         for (Direction dir : Direction.values()) {
-            int totalGrain = 0;
-            for (int dist = 1; dist <= vision; dist++) {
-                int newX = (x + dir.getDx() * dist + world.width) % world.width;
-                int newY = (y + dir.getDy() * dist + world.height) % world.height;
-                totalGrain += world.map[newX][newY].getGrainHere();
-            }
-            if (totalGrain > maxGrain) {
-                maxGrain = totalGrain;
-                bestDir = dir;
+            int grainInDirection = getGrainAhead(world, dir);
+            if (grainInDirection > bestAmount) {
+                bestAmount = grainInDirection;
+                bestDirection = dir;
             }
         }
+        
+        currentDirection = bestDirection;
+    }
 
-        // Move the turtle
-        if (bestDir != null) {
-            move(bestDir, world);
+    /**
+     * Calculate total grain ahead in specified direction following NetLogo's grain-ahead logic
+     */
+    private int getGrainAhead(World world, Direction direction) {
+        int total = 0;
+        for (int distance = 1; distance <= vision; distance++) {
+            Patch patch = world.getPatchAhead(x, y, direction, distance);
+            total += patch.getGrainHere();
+        }
+        return total;
+    }
+
+    /**
+     * Move, eat grain, age, and possibly die following NetLogo's move-eat-age-die logic
+     */
+    public void moveEatAgeDie(World world) {
+        // Move forward 1 step
+        if (currentDirection != null) {
+            x = (x + currentDirection.getDx() + world.width) % world.width;
+            y = (y + currentDirection.getDy() + world.height) % world.height;
+        }
+        
+        // Consume grain according to metabolism
+        wealth -= metabolism;
+        
+        // Age
+        age++;
+        
+        // Check death conditions: no grain or exceeded life expectancy
+        if (wealth < 0 || age >= lifeExpectancy) {
+            setInitialTurtleVars(world);
         }
     }
 
-    public void move(Direction dir, World world) {
-        x = (x + dir.getDx() + world.width) % world.width;
-        y = (y + dir.getDy() + world.height) % world.height;
+    /**
+     * Reset turtle variables following NetLogo's set-initial-turtle-vars logic
+     */
+    private void setInitialTurtleVars(World world) {
+        // Randomly set new attributes
+        this.lifeExpectancy = world.minLifeExpectancy + 
+                             random.nextInt(world.maxLifeExpectancy - world.minLifeExpectancy + 1);
+        this.metabolism = 1 + random.nextInt(world.maxMetabolism);
+        this.vision = 1 + random.nextInt(world.maxVision);
+        
+        // Set wealth: metabolism + random 0-49
+        this.wealth = this.metabolism + random.nextInt(50);
+        
+        // Set random age
+        this.age = random.nextInt(this.lifeExpectancy);
+        
+        // Move to random location
+        int[] location = world.getRandomPatchLocation();
+        this.x = location[0];
+        this.y = location[1];
+    }
+
+    // Keep original methods for compatibility
+    public void move(World world) {
+        if (currentDirection != null) {
+            x = (x + currentDirection.getDx() + world.width) % world.width;
+            y = (y + currentDirection.getDy() + world.height) % world.height;
+        }
     }
 
     public void harvest(World world) {
-        Patch patch = world.map[x][y];
-        List<Turtle> turtlesHere = new ArrayList<>();
-        
-        // Find all turtles on the same patch
-        for (Turtle t : world.turtles) {
-            if (t.x == x && t.y == y) {
-                turtlesHere.add(t);
-            }
-        }
-        
-        // Distribute grain equally
-        int grainPerTurtle = patch.getGrainHere() / turtlesHere.size();
-        wealth += grainPerTurtle;
-        patch.setGrainHere(0);
+        // This method is now handled in World class, keeping empty implementation for compatibility
     }
 
     public void ageAndConsume() {
@@ -78,13 +120,6 @@ public class Turtle {
     }
 
     public void rebirth(World world) {
-        this.age = 0;
-        this.metabolism = 1 + random.nextInt(world.maxMetabolism);
-        this.vision = 1 + random.nextInt(world.maxVision);
-        this.lifeExpectancy = world.minLifeExpectancy + 
-                             random.nextInt(world.maxLifeExpectancy - world.minLifeExpectancy + 1);
-        this.wealth = this.metabolism + random.nextInt(50);
-        this.x = random.nextInt(world.width);
-        this.y = random.nextInt(world.height);
+        setInitialTurtleVars(world);
     }
 }
