@@ -1,13 +1,15 @@
-package model;
+package core;
 
 public class Patch {
 
     private int grainHere;
     private int maxGrain;
+    private int spreadWealth; // Wealth spread to this patch
 
     public Patch(int maxGrain) {
         this.maxGrain = maxGrain;
         grainHere = 0;
+        spreadWealth = 0;
     }
 
     /**
@@ -50,6 +52,30 @@ public class Patch {
         this.maxGrain = maxGrain;
     }
 
+    /**
+     * Add spread wealth to this patch
+     * @param wealth Amount of wealth to add
+     */
+    public void addSpreadWealth(int wealth) {
+        this.spreadWealth += wealth;
+    }
 
+    /**
+     * Harvest and clear spread wealth on this patch
+     * @return Accumulated spread wealth
+     */
+    public int harvestSpreadWealth() {
+        int wealth = this.spreadWealth;
+        this.spreadWealth = 0;
+        return wealth;
+    }
+
+    /**
+     * Get current spread wealth (without clearing)
+     * @return Current amount of spread wealth
+     */
+    public int getSpreadWealth() {
+        return spreadWealth;
+    }
 
 }

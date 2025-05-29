@@ -1,5 +1,8 @@
-package model;
-public class Main {
+package models;
+
+import core.World;
+
+public class BaselineMain {
     public static void main(String[] args) {
 
         World world = new World(50, 50, 250, 5, 15, 
@@ -7,7 +10,7 @@ public class Main {
         1, 4);
         
         // Initialize CSV export
-        world.initializeCsvExport("wealth_simulation_results.csv");
+        world.initializeCsvExport("data/output/wealth_simulation_results.csv");
         
         world.initialize(42);
 
@@ -21,6 +24,6 @@ public class Main {
         // Close CSV export
         world.closeCsvExport();
         
-        System.out.println("Simulation completed. Results exported to wealth_simulation_results.csv");
+        System.out.println("Simulation completed. Results exported to data/output/wealth_simulation_results.csv");
     }
 }

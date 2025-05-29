@@ -1,30 +1,31 @@
-package model;
+package core;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import stats.CsvExporter;
+import utils.CsvExporter;
+import utils.GiniCalculator;
 
 public class World {
-    int width, height;
-    Patch[][] map;
-    List<Turtle> turtles;
-    Random random;
-    int maxPeople;
-    int maxVision;
-    int maxMetabolism;
-    int minLifeExpectancy;
-    int maxLifeExpectancy;
-    int percentBestLand;
-    int grainGrowthInterval;
-    int numGrainGrown;
-    int ticks;
+    protected int width, height;
+    protected Patch[][] map;
+    protected List<Turtle> turtles;
+    protected Random random;
+    protected int maxPeople;
+    protected int maxVision;
+    protected int maxMetabolism;
+    protected int minLifeExpectancy;
+    protected int maxLifeExpectancy;
+    protected int percentBestLand;
+    protected int grainGrowthInterval;
+    protected int numGrainGrown;
+    protected int ticks;
     
     // Global constant, corresponding to NetLogo's max-grain
     private static final int MAX_GRAIN = 50;
     
     // CSV export
-    private CsvExporter csvExporter;
+    protected CsvExporter csvExporter;
 
     public World(){}
 
@@ -156,7 +157,7 @@ public class World {
     /**
      * Setup turtles following NetLogo's setup-turtles logic
      */
-    private void setupTurtles() {
+    protected void setupTurtles() {
         for (int i = 0; i < maxPeople; i++) {
             // Set initial turtle variables
             int metabolism = 1 + random.nextInt(maxMetabolism);
@@ -217,7 +218,7 @@ public class World {
     /**
      * Harvest grain following NetLogo's harvest logic
      */
-    private void harvest() {
+    protected void harvest() {
         // First let all turtles harvest grain
         for (Turtle turtle : turtles) {
             Patch patch = map[turtle.x][turtle.y];
@@ -246,7 +247,7 @@ public class World {
     /**
      * Grow grain following NetLogo's grow-grain logic
      */
-    private void growGrain() {
+    protected void growGrain() {
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 map[x][y].growGrain(numGrainGrown);
@@ -279,7 +280,7 @@ public class World {
         }
         
         double avgWealth = (double) totalWealth / turtles.size();
-        double gini = stats.GiniCalculator.compute(wealths);
+        double gini = GiniCalculator.compute(wealths);
         
         // Calculate wealth class distribution (following NetLogo's recolor-turtles logic)
         int[] wealthClasses = new int[3]; // 0: poor (red), 1: middle (green), 2: rich (blue)
@@ -415,5 +416,35 @@ public class World {
      */
     public int[] getRandomPatchLocation() {
         return new int[]{random.nextInt(width), random.nextInt(height)};
+    }
+
+    /**
+     * Get patch at specified coordinates
+     */
+    public Patch getPatch(int x, int y) {
+        return map[x][y];
+    }
+
+    /**
+     * Get list of all turtles
+     */
+    public List<Turtle> getTurtles() {
+        return turtles;
+    }
+
+    /**
+     * Get max life expectancy
+     */
+    public int getMaxLifeExpectancy() {
+        return maxLifeExpectancy;
+    }
+    public int getMinLifeExpectancy() {
+        return minLifeExpectancy;
+    }
+    public int getMaxMetabolism() {
+        return maxMetabolism;
+    }
+    public int getMaxVision() {
+        return maxVision;
     }
 }

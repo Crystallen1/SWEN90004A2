@@ -3,15 +3,23 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import pearsonr
 import seaborn as sns
+import os
 
 # Set font for better display
 plt.rcParams['font.sans-serif'] = ['Arial', 'DejaVu Sans']
 plt.rcParams['axes.unicode_minus'] = False
 
-# Read data
-wealth_data = pd.read_csv('wealth_simulation_results.csv')
-class_plot_data = pd.read_csv('class-plot (3).csv')
-gini_data = pd.read_csv('gini-index-v-time (2).csv')
+# Define paths
+data_dir = '../data/output/'
+plots_dir = '../data/plots/'
+
+# Create plots directory if it doesn't exist
+os.makedirs(plots_dir, exist_ok=True)
+
+# Read data with correct paths
+wealth_data = pd.read_csv(os.path.join(data_dir, 'wealth_simulation_results.csv'))
+class_plot_data = pd.read_csv(os.path.join(data_dir, 'class-plot (3).csv'))
+gini_data = pd.read_csv(os.path.join(data_dir, 'gini-index-v-time (2).csv'))
 
 # Create figures
 fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 10))
@@ -36,7 +44,7 @@ ax2.legend()
 ax2.grid(True, alpha=0.3)
 
 plt.tight_layout()
-plt.savefig('wealth_simulation_plots.png', dpi=300, bbox_inches='tight')
+plt.savefig(os.path.join(plots_dir, 'wealth_simulation_plots.png'), dpi=300, bbox_inches='tight')
 plt.show()
 
 # Calculate correlation coefficients
@@ -149,10 +157,10 @@ axes[1,1].legend()
 axes[1,1].grid(True, alpha=0.3)
 
 plt.tight_layout()
-plt.savefig('comparison_plots.png', dpi=300, bbox_inches='tight')
+plt.savefig(os.path.join(plots_dir, 'comparison_plots.png'), dpi=300, bbox_inches='tight')
 plt.show()
 
 print("\nAnalysis Complete! Generated image files:")
-print("- wealth_simulation_plots.png: Wealth class and Gini coefficient trends")
-print("- correlation_heatmap.png: Correlation heatmap")
-print("- comparison_plots.png: Comparison with reference data") 
+print(f"- {os.path.join(plots_dir, 'wealth_simulation_plots.png')}: Wealth class and Gini coefficient trends")
+print(f"- {os.path.join(plots_dir, 'comparison_plots.png')}: Comparison with reference data")
+print(f"\nAll files saved to: {os.path.abspath(plots_dir)}") 
