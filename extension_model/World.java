@@ -1,4 +1,4 @@
-package model;
+package extension_model;
 
 import java.util.ArrayList;
 import java.util.List;

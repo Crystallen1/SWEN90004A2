@@ -1,4 +1,4 @@
-package model;
+package extension_model;
 
 import java.util.Random;
 import java.util.List;
@@ -74,28 +74,48 @@ public class Turtle {
         
         // Check death conditions: no grain or exceeded life expectancy
         if (wealth < 0 || age >= lifeExpectancy) {
-            setInitialTurtleVars(world);
+            handleInheritance(world);
         }
     }
 
     /**
-     * Reset turtle variables following NetLogo's set-initial-turtle-vars logic
+     * 处理财产继承逻辑
      */
-    private void setInitialTurtleVars(World world) {
-        // Randomly set new attributes
+    private void handleInheritance(World world) {
+        int inheritedWealth;
+        
+        if (wealth < 0) {
+            // 破产死亡：给予基本生存资金，模拟社会保障或家庭最低支持
+            inheritedWealth = metabolism + random.nextInt(3); // metabolism + 0-2的随机支持
+        } else {
+            // 自然死亡：继承大部分财产，但有一定损失（税收、丧葬费等）
+            inheritedWealth = (int) (wealth * (0.7 + random.nextDouble() * 0.2)); // 70%-90%继承率
+            // 确保至少有基本生存资金
+            inheritedWealth = Math.max(inheritedWealth, metabolism + 1);
+        }
+        
+        // 重置为新个体
+        resetAsNewIndividual(world, inheritedWealth);
+    }
+
+    /**
+     * 重置为新个体，带有继承的财产
+     */
+    private void resetAsNewIndividual(World world, int inheritedWealth) {
+        // 随机设置新属性
         this.lifeExpectancy = world.minLifeExpectancy + 
                              random.nextInt(world.maxLifeExpectancy 
                              - world.minLifeExpectancy + 1);
         this.metabolism = 1 + random.nextInt(world.maxMetabolism);
         this.vision = 1 + random.nextInt(world.maxVision);
         
-        // Set wealth: metabolism + random 0-49
-        this.wealth = this.metabolism + random.nextInt(50);
+        // 设置继承的财产
+        this.wealth = inheritedWealth;
         
-        // Set random age
+        // 设置随机年龄
         this.age = random.nextInt(this.lifeExpectancy);
         
-        // Move to random location
+        // 移动到随机位置
         int[] location = world.getRandomPatchLocation();
         this.x = location[0];
         this.y = location[1];
@@ -108,6 +128,7 @@ public class Turtle {
             y = (y + currentDirection.getDy() + world.height) % world.height;
         }
     }
+
     public void ageAndConsume() {
         age++;
         wealth -= metabolism;
@@ -118,6 +139,6 @@ public class Turtle {
     }
 
     public void rebirth(World world) {
-        setInitialTurtleVars(world);
+        handleInheritance(world);
     }
 }

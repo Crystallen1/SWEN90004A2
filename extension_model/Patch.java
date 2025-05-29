@@ -1,4 +1,4 @@
-package model;
+package extension_model;
 
 public class Patch {
 
