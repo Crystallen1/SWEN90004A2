@@ -21,6 +21,9 @@ public class ComparisonMain {
             grainGrowthInterval, numGrainGrown
         );
         
+        // Initialize CSV export
+        comparator.initializeCsvExport("data/output/model_comparison_results.csv");
+        
         // Initialize (use same random seed for fair comparison)
         int seed = 42;
         comparator.initialize(seed);
@@ -42,5 +45,10 @@ public class ComparisonMain {
         System.out.println();
         
         comparator.runComparison(steps, reportInterval);
+        
+        // Close CSV export
+        comparator.closeCsvExport();
+        
+        System.out.println("Simulation completed. Results exported to data/output/model_comparison_results.csv");
     }
 } 

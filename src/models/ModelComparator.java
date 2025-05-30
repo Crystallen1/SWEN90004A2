@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import core.Turtle;
 import utils.GiniCalculator;
+import utils.ComparisonCsvExporter;
 import core.World;
+
 public class ModelComparator {
     private World baselineWorld;
     private TaxRedistributionWorld taxWorld;
@@ -17,6 +19,8 @@ public class ModelComparator {
     private List<Double> baselineAvgWealth;
     private List<Double> taxAvgWealth;
     private List<Double> spreadingAvgWealth;
+    
+    private ComparisonCsvExporter csvExporter;
     
     public ModelComparator(int width, int height, int maxPeople, int maxVision,
                           int maxMetabolism, int minLifeExpectancy, int maxLifeExpectancy,
@@ -43,6 +47,24 @@ public class ModelComparator {
         baselineAvgWealth = new ArrayList<>();
         taxAvgWealth = new ArrayList<>();
         spreadingAvgWealth = new ArrayList<>();
+        
+        // Initialize CSV exporter
+        csvExporter = new ComparisonCsvExporter();
+    }
+    
+    /**
+     * Initialize CSV export
+     * @param filename The CSV file to export data to
+     */
+    public void initializeCsvExport(String filename) {
+        csvExporter.initialize(filename);
+    }
+    
+    /**
+     * Close CSV export
+     */
+    public void closeCsvExport() {
+        csvExporter.close();
     }
     
     /**
@@ -73,7 +95,7 @@ public class ModelComparator {
             spreadingWorld.step();
             
             // Collect statistics
-            collectStatistics();
+            collectStatistics(step);
             
             // Report periodically
             if (step % reportInterval == 0) {
@@ -88,7 +110,7 @@ public class ModelComparator {
     /**
      * Collect statistics for current step
      */
-    private void collectStatistics() {
+    private void collectStatistics(int step) {
         // Baseline model statistics
         List<Integer> baselineWealths = new ArrayList<>();
         int baselineTotal = 0;
@@ -99,6 +121,11 @@ public class ModelComparator {
         if (!baselineWealths.isEmpty()) {
             baselineGini.add(GiniCalculator.compute(baselineWealths));
             baselineAvgWealth.add((double) baselineTotal / baselineWealths.size());
+            
+            // Export to CSV
+            if (csvExporter.isInitialized()) {
+                csvExporter.exportModelData(step, "Baseline", baselineWorld.getTurtles().size(), baselineWealths);
+            }
         }
         
         // Tax model statistics
@@ -111,6 +138,11 @@ public class ModelComparator {
         if (!taxWealths.isEmpty()) {
             taxGini.add(GiniCalculator.compute(taxWealths));
             taxAvgWealth.add((double) taxTotal / taxWealths.size());
+            
+            // Export to CSV
+            if (csvExporter.isInitialized()) {
+                csvExporter.exportModelData(step, "Tax", taxWorld.getTurtles().size(), taxWealths);
+            }
         }
         
         // Spreading model statistics
@@ -123,6 +155,11 @@ public class ModelComparator {
         if (!spreadingWealths.isEmpty()) {
             spreadingGini.add(GiniCalculator.compute(spreadingWealths));
             spreadingAvgWealth.add((double) spreadingTotal / spreadingWealths.size());
+            
+            // Export to CSV
+            if (csvExporter.isInitialized()) {
+                csvExporter.exportModelData(step, "Spreading", spreadingWorld.getTurtles().size(), spreadingWealths);
+            }
         }
     }
     

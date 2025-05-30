@@ -4,6 +4,7 @@ import core.World;
 import java.util.ArrayList;
 import java.util.List;
 import utils.GiniCalculator;
+import utils.ComparisonCsvExporter;
 import core.Turtle;
 
 public class InheritanceMain {
@@ -11,8 +12,12 @@ public class InheritanceMain {
     private static List<Double> inheritanceGini = new ArrayList<>();
     private static List<Double> baselineAvgWealth = new ArrayList<>();
     private static List<Double> inheritanceAvgWealth = new ArrayList<>();
+    private static ComparisonCsvExporter csvExporter = new ComparisonCsvExporter();
     
     public static void main(String[] args) {
+        // Initialize CSV export
+        csvExporter.initialize("data/output/inheritance_comparison_results.csv");
+        
         // Create inheritance model
         InheritanceWorld inheritanceWorld = new InheritanceWorld(50, 50, 250, 5, 15, 
         1, 83, 10, 
@@ -41,10 +46,13 @@ public class InheritanceMain {
             }
         }
         
+        // Close CSV export
+        csvExporter.close();
+        
         // Print final summary report
         printFinalSummary();
         
-        System.out.println("\nSimulation completed!");
+        System.out.println("\nSimulation completed. Results exported to data/output/inheritance_comparison_results.csv");
     }
     
     /**
@@ -61,6 +69,11 @@ public class InheritanceMain {
             }
             inheritanceGini.add(GiniCalculator.compute(inheritanceWealths));
             inheritanceAvgWealth.add((double) inheritanceTotal / inheritanceWealths.size());
+            
+            // Export to CSV
+            if (csvExporter.isInitialized()) {
+                csvExporter.exportModelData(step, "Inheritance", inheritanceWorld.getTurtles().size(), inheritanceWealths);
+            }
         }
         
         // Baseline model statistics
@@ -73,6 +86,11 @@ public class InheritanceMain {
             }
             baselineGini.add(GiniCalculator.compute(baselineWealths));
             baselineAvgWealth.add((double) baselineTotal / baselineWealths.size());
+            
+            // Export to CSV
+            if (csvExporter.isInitialized()) {
+                csvExporter.exportModelData(step, "Baseline", baselineWorld.getTurtles().size(), baselineWealths);
+            }
         }
     }
     
