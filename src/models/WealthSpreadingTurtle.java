@@ -7,6 +7,7 @@ import java.util.Random;
 public class WealthSpreadingTurtle extends Turtle {
     private static final double WEALTH_SPREADING_RATE = 0.2; // 20% wealth spreading rate
     protected static final Random random = new Random();
+    private int wealthSpreadingCounter = 0; // Counter for wealth spreading cycles
 
     public WealthSpreadingTurtle(int metabolism, int vision, int lifeExpectancy) {
         super(metabolism, vision, lifeExpectancy);
@@ -42,6 +43,9 @@ public class WealthSpreadingTurtle extends Turtle {
         // Set random starting age (0 to life expectancy)
         this.age = random.nextInt(this.lifeExpectancy);
         
+        // Initialize wealth spreading counter to random value to avoid synchronization
+        this.wealthSpreadingCounter = world.getMaxLifeExpectancy() / 8;
+        
         // Place turtle at a random location in the world
         int[] location = world.getRandomPatchLocation();
         this.x = location[0];
@@ -57,12 +61,19 @@ public class WealthSpreadingTurtle extends Turtle {
         int previousX = this.x;
         int previousY = this.y;
         
-        // Check if rich before moving and get wealth to spread
+        // Increment wealth spreading counter
+        wealthSpreadingCounter++;
+        
+        // Calculate wealth spreading interval (maxLifeExpectancy / 2)
+        int spreadingInterval = Math.max(1, this.lifeExpectancy / 2);
+        
+        // Check if it's time to spread wealth and if turtle is rich
         int wealthToSpread = 0;
-        if (isRich(world)) {
+        if (wealthSpreadingCounter >= spreadingInterval && isRich(world)) {
             wealthToSpread = (int) (this.wealth * WEALTH_SPREADING_RATE);
             if (wealthToSpread > 0) {
                 this.wealth -= wealthToSpread;
+                wealthSpreadingCounter = 0; // Reset counter after spreading
             }
         }
         

@@ -14,7 +14,7 @@ public class TaxRedistributionWorld extends World {
                                  int percentBestLand, int grainGrowthInterval, int numGrainGrown) {
         super(width, height, maxPeople, maxVision, maxMetabolism, minLifeExpectancy, 
               maxLifeExpectancy, percentBestLand, grainGrowthInterval, numGrainGrown);
-        this.taxInterval = maxLifeExpectancy / 2; // Tax every max_age/2 rounds
+        this.taxInterval = maxLifeExpectancy / 8; // Tax every max_age/2 rounds
     }
     /**
      * Setup turtles using InheritanceTurtle instead of regular Turtle
